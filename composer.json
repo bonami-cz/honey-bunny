@@ -17,5 +17,8 @@
             "name": "Jan Machala",
             "email": "jan.machala@email.cz"
         }
-    ]
+    ],
+    "require-dev": {
+        "phpstan/phpstan": "^0.7.0"
+    }
 }

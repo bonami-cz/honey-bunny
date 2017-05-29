@@ -1,0 +1,5 @@
+parameters:
+	ignoreErrors:
+		- '~Function pcntl_signal not found~'
+		- '~Constant SIGTERM not found~'
+		- '~Constant SIGINT not found~'
