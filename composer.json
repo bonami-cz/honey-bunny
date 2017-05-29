@@ -2,6 +2,11 @@
     "name": "bonami-cz/honey-bunny",
     "description": "A simple abstraction for rabbit build on top of bunny",
     "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Bonami\\": ["src/Bonami"]
+        }
+    },
     "require": {
         "bunny/bunny": "~0.2",
         "php": ">=7.0.0|~5.6"
