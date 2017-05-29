@@ -9,6 +9,7 @@
     },
     "require": {
         "bunny/bunny": "~0.2",
+        "ext-pcntl": "*",
         "php": ">=7.0.0|~5.6"
     },
     "authors": [
