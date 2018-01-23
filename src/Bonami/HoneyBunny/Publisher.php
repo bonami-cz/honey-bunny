@@ -53,7 +53,10 @@ class Publisher {
 	 */
 	public function publish($message) {
 		$this->initialize();
-		$this->channel->publish($message, [], $this->exchangeName, $this->queue);
+		$headers = [
+			'delivery_mode' => 2, // Persistent delivery
+		];
+		$this->channel->publish($message, $headers, $this->exchangeName, $this->queue);
 	}
 
 	/** @return void */
