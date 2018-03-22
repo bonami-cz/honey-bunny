@@ -51,12 +51,13 @@ class Publisher {
 	 * @param $message string
 	 * @return void
 	 */
-	public function publish($message) {
+	public function publish($message, $routingKey = null) {
 		$this->initialize();
 		$headers = [
 			'delivery_mode' => 2, // Persistent delivery
 		];
-		$this->channel->publish($message, $headers, $this->exchangeName, $this->queue);
+		$routing = $routingKey ?? $this->queue;
+		$this->channel->publish($message, $headers, $this->exchangeName, $routing);
 	}
 
 	/** @return void */
