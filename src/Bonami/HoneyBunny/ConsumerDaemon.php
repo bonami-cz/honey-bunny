@@ -32,6 +32,8 @@ class ConsumerDaemon {
 	private $exchangeName;
 	/** @var string|null */
 	private $routingKey;
+	/** @var bool */
+	private $requeue;
 
 	/**
 	 * @param $queueName string
@@ -41,6 +43,7 @@ class ConsumerDaemon {
 	 * @param $messageConsumer IMessageConsumer
 	 * @param $queueName string|null
 	 * @param $exchangeName string|null
+	 * @param $requeue string|null
 	 * @param $rabbitClient Client
 	 * @param $messageConsumedObserver IMessageConsumedObserver|null
 	 */
@@ -52,6 +55,7 @@ class ConsumerDaemon {
 		IMessageConsumer $messageConsumer,
 		$exchangeName = null,
 		$routingKey = null,
+		$requeue = true,
 		Client $rabbitClient,
 		IMessageConsumedObserver $messageConsumedObserver = null
 	) {
@@ -105,7 +109,7 @@ class ConsumerDaemon {
 		$this->channel->run(function (Message $message, Channel $channel) {
 			($result = $this->messageConsumer->consumeMessage($message))
 				? $channel->ack($message)
-				: $channel->nack($message);
+				: $channel->nack($message, false, $this->requeue);
 			$this->messageConsumedObserver->notify();
 		}, $queueName);
 	}
