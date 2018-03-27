@@ -22,6 +22,8 @@ class Publisher {
 	private $exchangeType;
 	/** @var bool */
 	private $initialized;
+	/** @var string */
+	private $deadLetterExchange;
 
 	/**
 	 * @param $queue string
@@ -29,19 +31,22 @@ class Publisher {
 	 * @param $exchangeType string
 	 * @param $durable bool
 	 * @param $rabbitClient Client
+	 * @param $deadLetterExchangeName string|null
 	 */
 	public function __construct(
 		$queue,
 		$exchangeName,
 		$exchangeType,
 		$durable,
-		Client $rabbitClient
+		Client $rabbitClient,
+		$deadLetterExchangeName = null
 	) {
 		$this->queue = $queue;
 		$this->exchangeName = $exchangeName;
 		$this->exchangeType = $exchangeType;
 		$this->durable = $durable;
 		$this->rabbitClient = $rabbitClient;
+		$this->deadLetterExchange = $deadLetterExchangeName;
 
 		$this->channel = null;
 		$this->initialized = false;
@@ -51,12 +56,13 @@ class Publisher {
 	 * @param $message string
 	 * @return void
 	 */
-	public function publish($message) {
+	public function publish($message, $routingKey = null) {
 		$this->initialize();
 		$headers = [
 			'delivery_mode' => 2, // Persistent delivery
 		];
-		$this->channel->publish($message, $headers, $this->exchangeName, $this->queue);
+		$routing = $routingKey ?? $this->queue;
+		$this->channel->publish($message, $headers, $this->exchangeName, $routing);
 	}
 
 	/** @return void */
@@ -64,11 +70,17 @@ class Publisher {
 		if (!$this->initialized) {
 			$this->connect();
 			$this->createChannel();
+
 			if ($this->exchangeName) {
 				$this->declareExchange();
 			} else {
 				$this->declareQueue();
 			}
+
+			if ($this->deadLetterExchange) {
+				$this->declareDeadLetterExchange();
+			}
+
 			$this->initialized = true;
 		}
 	}
@@ -86,12 +98,20 @@ class Publisher {
 	}
 
 	/** @return void */
+	private function declareDeadLetterExchange() {
+		$this->channel->exchangeDeclare($this->deadLetterExchange, 'direct', false, $this->durable);
+	}
+
+	/** @return void */
 	private function declareExchange() {
 		$this->channel->exchangeDeclare($this->exchangeName, $this->exchangeType, false, $this->durable);
 	}
 
 	/** @return void */
 	private function declareQueue() {
-		$this->channel->queueDeclare($this->queue, false, $this->durable);
+		if ($deadLetterExchangeName) {
+			$queueArguments = ['x-dead-letter-exchange' => $deadLetterExchangeName];
+		}
+		$this->channel->queueDeclare($this->queue, false, $this->durable, false, false, false, $queueArguments);
 	}
 }

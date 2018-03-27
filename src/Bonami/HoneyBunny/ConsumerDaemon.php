@@ -28,6 +28,12 @@ class ConsumerDaemon {
 	private $channel;
 	/** @var IMessageConsumedObserver|null */
 	private $messageConsumedObserver;
+	/** @var string|null */
+	private $exchangeName;
+	/** @var string|null */
+	private $routingKey;
+	/** @var bool */
+	private $requeue;
 
 	/**
 	 * @param $queueName string
@@ -35,6 +41,9 @@ class ConsumerDaemon {
 	 * @param $prefetchSize int
 	 * @param $prefetchCount int
 	 * @param $messageConsumer IMessageConsumer
+	 * @param $queueName string|null
+	 * @param $exchangeName string|null
+	 * @param $requeue string|null
 	 * @param $rabbitClient Client
 	 * @param $messageConsumedObserver IMessageConsumedObserver|null
 	 */
@@ -44,6 +53,9 @@ class ConsumerDaemon {
 		$prefetchSize,
 		$prefetchCount,
 		IMessageConsumer $messageConsumer,
+		$exchangeName = null,
+		$routingKey = null,
+		$requeue = true,
 		Client $rabbitClient,
 		IMessageConsumedObserver $messageConsumedObserver = null
 	) {
@@ -55,6 +67,8 @@ class ConsumerDaemon {
 		$this->rabbitClient = $rabbitClient;
 		$this->channel = null;
 		$this->messageConsumedObserver = $messageConsumedObserver;
+		$this->exchangeName = $exchangeName;
+		$this->routingKey = $exchangeName;
 	}
 
 	/** @return void */
@@ -62,6 +76,11 @@ class ConsumerDaemon {
 		$this->connect();
 		$this->createChannel();
 		$this->declareQueue($this->queueName);
+
+		if ($this->exchangeName) {
+			$this->bindQueue();
+		}
+
 		$this->registerSignalHandlers();
 
 		try {
@@ -90,7 +109,7 @@ class ConsumerDaemon {
 		$this->channel->run(function (Message $message, Channel $channel) {
 			($result = $this->messageConsumer->consumeMessage($message))
 				? $channel->ack($message)
-				: $channel->nack($message);
+				: $channel->nack($message, false, $this->requeue);
 			$this->messageConsumedObserver->notify();
 		}, $queueName);
 	}
@@ -122,6 +141,10 @@ class ConsumerDaemon {
 	 */
 	protected function declareQueue($queueName) {
 		$this->channel->queueDeclare($queueName, false, $this->durable);
+	}
+
+	protected function bindQueue() {
+		$this->channel->queueBind($this->queueName, $this->exchangeName, $this->routingKey);
 	}
 
 }
