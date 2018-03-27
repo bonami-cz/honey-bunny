@@ -61,7 +61,7 @@ class Publisher {
 		$headers = [
 			'delivery_mode' => 2, // Persistent delivery
 		];
-		$routing = $routingKey ?? $this->queue;
+		$routing = $routingKey ? $routingKey : $this->queue;
 		$this->channel->publish($message, $headers, $this->exchangeName, $routing);
 	}
 
