@@ -109,6 +109,7 @@ class Publisher {
 
 	/** @return void */
 	private function declareQueue() {
+		$queueArguments = [];
 		if ($deadLetterExchangeName) {
 			$queueArguments = ['x-dead-letter-exchange' => $deadLetterExchangeName];
 		}
