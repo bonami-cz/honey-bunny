@@ -68,7 +68,7 @@ class ConsumerDaemon {
 		$this->channel = null;
 		$this->messageConsumedObserver = $messageConsumedObserver;
 		$this->exchangeName = $exchangeName;
-		$this->routingKey = $exchangeName;
+		$this->routingKey = $routingKey;
 	}
 
 	/** @return void */
