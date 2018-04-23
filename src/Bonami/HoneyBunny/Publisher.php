@@ -110,8 +110,8 @@ class Publisher {
 	/** @return void */
 	private function declareQueue() {
 		$queueArguments = [];
-		if ($deadLetterExchangeName) {
-			$queueArguments = ['x-dead-letter-exchange' => $deadLetterExchangeName];
+		if ($this->deadLetterExchange) {
+			$queueArguments = ['x-dead-letter-exchange' => $this->deadLetterExchange];
 		}
 		$this->channel->queueDeclare($this->queue, false, $this->durable, false, false, false, $queueArguments);
 	}
