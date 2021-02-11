@@ -8,7 +8,7 @@
         }
     },
     "require": {
-        "bunny/bunny": "~0.2",
+        "bunny/bunny": "~0.2|dev-master#9d6be4aba9172c69925dc9d137e12dc88f6861ee",
         "ext-pcntl": "*",
         "php": ">=7.0.0|~5.6"
     },
